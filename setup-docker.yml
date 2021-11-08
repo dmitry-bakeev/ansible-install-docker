@@ -33,3 +33,16 @@
       url: "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-{{ ansible_facts['system'] }}-{{ ansible_facts['architecture'] }}"
       dest: /usr/local/bin/docker-compose
       mode: ugo+x
+
+  - name: Check user if exists
+    shell:
+      cmd: getent passwd {{ remote_user }}
+    ignore_errors: yes
+    register: user_exist
+
+  - name: Add existing user to docker group
+    user:
+      name: "{{ remote_user }}"
+      groups: docker
+      append: yes
+    when: user_exist.stdout != ""
